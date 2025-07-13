@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuestionario Interactivo: Didáctica de la Física</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .feedback-correct {
+            color: #16a34a; /* green-600 */
+        }
+        .feedback-incorrect {
+            color: #dc2626; /* red-600 */
+        }
+        .quiz-container {
+            max-width: 800px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="quiz-container container mx-auto p-4 sm:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Cuestionario Interactivo de Didáctica de la Física</h1>
+            <p class="text-gray-600 mt-2">Pon a prueba tus conocimientos sobre los conceptos clave del documento.</p>
+        </header>
+
+        <main id="quiz-area" class="bg-white p-6 rounded-xl shadow-lg">
+            <!-- Las preguntas se cargarán aquí dinámicamente -->
+        </main>
+
+        <div id="results-area" class="hidden text-center bg-white p-6 mt-8 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold mb-4">Resultados Finales</h2>
+            <p class="text-xl mb-2">Tu puntuación total es: <span id="score" class="font-bold">0</span> / 100</p>
+            <p id="final-feedback" class="text-lg italic text-gray-700 mb-6"></p>
+            <button onclick="restartQuiz()" class="bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                Intentar de Nuevo
+            </button>
+        </div>
+
+        <footer class="text-center mt-8 text-sm text-gray-500">
+            <p>Desarrollado por Victor Crespo</p>
+        </footer>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "¿Cuál es el origen etimológico de la palabra Epistemología?",
+                options: ["Conocimiento y estudio", "Ciencia y método", "Lógica y razón", "Verdad y saber"],
+                answer: "Conocimiento y estudio",
+                page: 6,
+                feedback: "La Epistemología proviene del griego episteme (conocimiento) y logía (estudio), enfocándose en la naturaleza y validez del conocimiento."
+            },
+            {
+                question: "Según Popper, ¿en qué se ocupa principalmente la epistemología?",
+                options: ["En la génesis de los enunciados científicos", "En los enunciados de la ciencia y sus relaciones lógicas", "En el sujeto que adquiere el conocimiento", "En los aspectos sociales de la ciencia"],
+                answer: "En los enunciados de la ciencia y sus relaciones lógicas",
+                page: 7,
+                feedback: "Para Popper, la epistemología se ocupa de los enunciados de la ciencia y sus relaciones lógicas (justificación), considerándola desde un punto de vista objetivo y normativo."
+            },
+            {
+                question: "¿Qué caracteriza a la concepción neopositivista de la ciencia?",
+                options: ["La ciencia se elabora a través de la intuición", "Las teorías son independientes de los hechos", "La ciencia es acumulativa y se basa en hechos objetivos probados por experimentación", "La falsedad de un enunciado no afecta la teoría"],
+                answer: "La ciencia es acumulativa y se basa en hechos objetivos probados por experimentación",
+                page: 9,
+                feedback: "El neopositivismo considera que la ciencia se elabora a través de hechos objetivos y neutrales, probados por la experimentación, y que el conocimiento científico es acumulativo."
+            },
+            {
+                question: "Dentro del paradigma crítico histórico social, la Didáctica se considera una disciplina:",
+                options: ["Únicamente práctica y técnica", "Teórica, histórica y política", "Abstracta y filosófica", "Neutral y objetiva"],
+                answer: "Teórica, histórica y política",
+                page: 15,
+                feedback: "La Didáctica, desde una perspectiva crítica, es teórica (responde a concepciones de la educación y la sociedad), histórica (sus propuestas son resultado de momentos específicos) y política (se engarza a un proyecto social)."
+            },
+            {
+                question: "¿Cuál es el eje de acción de la Didáctica según el texto?",
+                options: ["La política educativa a nivel nacional", "La historia de la ciencia", "El aula – institución", "La psicología del aprendizaje"],
+                answer: "El aula – institución",
+                page: 16,
+                feedback: "Aunque su fundamentación es amplia, la Didáctica tiene como eje preeminente de su acción el micro espacio-temporal del aula y la institución."
+            },
+            {
+                question: "¿Qué es la planificación para la corriente tecnicista?",
+                options: ["Un acto creativo y espontáneo del docente.", "Un plan de trabajo que busca la eficiencia en la labor educativa mediante pasos definidos.", "Una imposición burocrática sin aporte práctico.", "Una herramienta para la transformación social."],
+                answer: "Un plan de trabajo que busca la eficiencia en la labor educativa mediante pasos definidos.",
+                page: 31,
+                feedback: "Las corrientes tecnicistas ven la planificación como un plan de trabajo con pasos rigurosos (objetivos, metodología, etc.) para lograr una mayor eficiencia y un producto deseado, considerando al docente como un ejecutor."
+            },
+            {
+                question: "¿Cuál de las siguientes NO es una función de la planificación mencionada por Libaneo?",
+                options: ["Asegurar la racionalización y organización del trabajo docente.", "Prever objetivos, contenidos y métodos.", "Imponer un modelo rígido que elimine la creatividad.", "Facilitar el trabajo de aula."],
+                answer: "Imponer un modelo rígido que elimine la creatividad.",
+                page: 35,
+                feedback: "Libaneo destaca funciones como la racionalización, la previsión y la facilitación del trabajo, no la imposición de rigidez. La planificación debe ser adaptable."
+            },
+            {
+                question: "En el contexto de la enseñanza de la física, la planificación es considerada como:",
+                options: ["Una pérdida de tiempo que burocratiza la docencia.", "Un recetario con éxito asegurado.", "La resolución de un problema en sentido amplio.", "Un documento exclusivamente para el control de las autoridades."],
+                answer: "La resolución de un problema en sentido amplio.",
+                page: 37,
+                feedback: "Desde la perspectiva de la enseñanza de la física, la planificación debe ser considerada como la resolución de un problema, requiriendo un conocimiento profundo de la física, su enseñanza y el contexto educativo."
+            },
+            {
+                question: "Según el texto, la evaluación es un constructo social que se le dan usos...",
+                options: ["únicamente educativos y formativos.", "matemáticos y estadísticos.", "ideológicos y políticos.", "invariables y atemporales."],
+                answer: "ideológicos y políticos.",
+                page: 121,
+                feedback: "El texto afirma que la evaluación es un constructo social al que se le dan usos ideológicos y políticos, a menudo confundidos con los usos puramente educativos."
+            },
+            {
+                question: "¿Qué función cumple el examen según la visión tradicional que critica Vaz Ferreira?",
+                options: ["Fomentar la curiosidad científica y el placer del estudio.", "Ser un estímulo intenso que obliga a un esfuerzo final.", "Evaluar el proceso de aprendizaje de forma continua.", "Promover la creatividad y el pensamiento crítico."],
+                answer: "Ser un estímulo intenso que obliga a un esfuerzo final.",
+                page: 115,
+                feedback: "Una de las 'ventajas' atribuidas al examen es su función como estímulo, que impulsa al estudiante a un esfuerzo intenso y a una revisión general de la asignatura justo antes de la prueba."
+            },
+            {
+                question: "La propuesta curricular de 'Ciencia, Tecnología y Sociedad' (CTS) busca principalmente:",
+                options: ["Preparar a los estudiantes para carreras científicas de élite.", "Enseñar la historia de los descubrimientos tecnológicos.", "Generar preocupación por los problemas sociales afectados por la ciencia y la tecnología.", "Desarrollar habilidades manuales en el laboratorio."],
+                answer: "Generar preocupación por los problemas sociales afectados por la ciencia y la tecnología.",
+                page: 26,
+                feedback: "El enfoque CTS busca preparar a los estudiantes para enfrentar problemáticas a nivel macro, discutiendo las razones político-sociales de las decisiones tomadas en ciencia y tecnología."
+            },
+             {
+                question: "¿Qué caracteriza al paradigma de la 'Escuela Nueva' en el triángulo pedagógico-didáctico?",
+                options: ["El docente es el elemento fundamental y poseedor del conocimiento.", "La materia a enseñar es el eje central del proceso.", "El alumno es el elemento principal y el proceso se centra en él.", "Se enfoca en la eficiencia y la estandarización de objetivos."],
+                answer: "El alumno es el elemento principal y el proceso se centra en él.",
+                page: 18,
+                feedback: "En la Pedagogía Nueva, el alumno es el centro del proceso educativo. El docente actúa como guía, buscando motivar al estudiante, y la materia se vuelve secundaria en función del aprendizaje del alumno."
+            },
+            {
+                question: "Según el texto, la especificidad de la Didáctica de la Física (DF) radica en:",
+                options: ["Ser una rama de la filosofía de la ciencia.", "La confluencia de la 'enseñanza' y la 'Física', creando una doble raíz epistemológica.", "Ser idéntica a la didáctica de cualquier otra ciencia.", "Enfocarse únicamente en la práctica de laboratorio."],
+                answer: "La confluencia de la 'enseñanza' y la 'Física', creando una doble raíz epistemológica.",
+                page: 20,
+                feedback: "La especificidad de la DF proviene de la conjunción entre 'enseñanza' y 'Física', lo que le otorga una doble raíz epistemológica autónoma que la distingue de otras didácticas."
+            },
+            {
+                question: "¿Cuál es el propósito de las 'rupturas' en el proceso educativo según Delizoikov?",
+                options: ["Generar problemas sin solución para desmotivar al alumno.", "Mantener el conocimiento estático y sin cambios.", "Llevar al alumno y al docente a formas de conocimiento superiores.", "Reforzar el sentido común y las ideas preexistentes."],
+                answer: "Llevar al alumno y al docente a formas de conocimiento superiores.",
+                page: 13,
+                feedback: "Las 'rupturas' (desequilibrios, conflictos) tienen como finalidad que el alumno y el docente alcancen formas de conocimiento superiores, promoviendo una praxis educativa que transcienda a una praxis social."
+            },
+            {
+                question: "¿Qué crítica se hace a la imagen de la ciencia que presentan los textos y medios de comunicación?",
+                options: ["La muestran como un proceso colectivo y contextualizado.", "Se presenta como una ciencia neutral, ahistórica y creada por genios.", "Destacan su relación con las crisis económicas y políticas.", "La describen como una ciencia falible y en constante debate."],
+                answer: "Se presenta como una ciencia neutral, ahistórica y creada por genios.",
+                page: 10,
+                feedback: "Generalmente, se preconiza una imagen de la ciencia como neutral, atemporal, acumulativa y obra de genios individuales, desvinculada de la problemática cotidiana."
+            },
+            {
+                question: "La 'alfabetización científica' busca formar ciudadanos capaces de:",
+                options: ["Memorizar todas las fórmulas físicas y químicas.", "Comprender, interpretar y actuar sobre la sociedad de forma activa y responsable.", "Ganar competencias científicas internacionales.", "Trabajar exclusivamente en laboratorios de alta tecnología."],
+                answer: "Comprender, interpretar y actuar sobre la sociedad de forma activa y responsable.",
+                page: 11,
+                feedback: "La alfabetización científica tiene como objetivo que la población pueda participar activa y responsablemente en los problemas del mundo, con conciencia de que la sociedad puede ser cambiada."
+            },
+            {
+                question: "En la evaluación, ¿qué son los conocimientos procedimentales?",
+                options: ["Conocer hechos y datos específicos.", "Comprender conceptos y principios teóricos.", "Saber hacer, aplicando conocimientos para resolver situaciones.", "Desarrollar valores y actitudes como la solidaridad."],
+                answer: "Saber hacer, aplicando conocimientos para resolver situaciones.",
+                page: 71,
+                feedback: "Los conocimientos procedimentales implican 'saber hacer'. Se evalúa el proceso que sigue el alumno para resolver una situación, los pasos, alternativas y fundamentos que utiliza."
+            },
+            {
+                question: "¿Qué es la evaluación formativa o continua?",
+                options: ["Una prueba final para calificar y seleccionar al alumno.", "Una evaluación constante durante el aprendizaje para orientar y reajustar el proceso.", "Un diagnóstico inicial para conocer las deficiencias del alumno.", "Una autoevaluación realizada por el propio estudiante."],
+                answer: "Una evaluación constante durante el aprendizaje para orientar y reajustar el proceso.",
+                page: 69,
+                feedback: "La evaluación continua o formativa es la que realiza el docente constantemente para orientar la eficiencia del aprendizaje, ajustando el proceso de enseñanza según sea necesario."
+            },
+            {
+                question: "La distinción entre 'evaluación' y 'acreditación' radica en que:",
+                options: ["Son sinónimos y se usan indistintamente.", "La evaluación es un proceso para comprender el aprendizaje, mientras que la acreditación es una certificación institucional.", "La evaluación solo mide datos cuantitativos y la acreditación, cualitativos.", "La evaluación la hace el docente y la acreditación, los padres."],
+                answer: "La evaluación es un proceso para comprender el aprendizaje, mientras que la acreditación es una certificación institucional.",
+                page: 73,
+                feedback: "La evaluación busca comprender el proceso de aprendizaje del sujeto, mientras que la acreditación es la certificación que una institución necesita para validar conocimientos, a menudo mediante cortes artificiales del aprendizaje."
+            },
+            {
+                question: "¿Qué caracteriza al profesor de Física según la investigación de Lang y Moreira?",
+                options: ["Ser estricto y autoritario.", "Dar explicaciones claras, tener didáctica y dominar la materia.", "Utilizar siempre la misma metodología.", "Evaluar únicamente con exámenes escritos."],
+                answer: "Dar explicaciones claras, tener didáctica y dominar la materia.",
+                page: 160,
+                feedback: "Según los estudiantes, un buen profesor de Física es aquel que da explicaciones claras, tiene didáctica, domina la materia, y se muestra seguro al responder, entre otras cualidades."
+            },
+             {
+                question: "Un inconveniente de la evaluación mediante 'ejercicios cerrados' es que:",
+                options: ["Promueve el pensamiento crítico y la creatividad.", "Permite evaluar conocimientos afectivos y actitudinales.", "Limita la enseñanza, eliminando temas como la historia de la ciencia o problemas cualitativos.", "Es muy subjetiva y difícil de corregir."],
+                answer: "Limita la enseñanza, eliminando temas como la historia de la ciencia o problemas cualitativos.",
+                page: 92-93,
+                feedback: "La evaluación basada exclusivamente en ejercicios cerrados limita la enseñanza al excluir conocimientos 'desechables' dentro de esa concepción, como la historia, la relación CTS o aspectos actitudinales."
+            },
+            {
+                question: "La investigación-acción se propone como un método para que los docentes:",
+                options: ["Apliquen teorías sin cuestionarlas.", "Sustituyan los modelos didácticos dominantes a través de la reflexión sobre su propia práctica.", "Se enfoquen únicamente en la teoría, sin importar la práctica.", "Mantengan las tradiciones educativas sin cambios."],
+                answer: "Sustituyan los modelos didácticos dominantes a través de la reflexión sobre su propia práctica.",
+                page: 17,
+                feedback: "La investigación-acción es sugerida como una forma para que los educadores puedan sustituir los modelos didácticos dominantes, reconceptualizando la enseñanza a partir de su propia problemática y no desde fórmulas librescas."
+            },
+            {
+                question: "El 'triángulo pedagógico-didáctico' está conformado por:",
+                options: ["Director, Inspector y Docente.", "Teoría, Práctica y Evaluación.", "Estudiante, Profesor y Materia a enseñar.", "Contenidos, Objetivos y Metodología."],
+                answer: "Estudiante, Profesor y Materia a enseñar.",
+                page: 17,
+                feedback: "El triángulo pedagógico-didáctico expresa la relación educativa a nivel de aula y está compuesto por la tríada: estudiante, profesor y la materia a enseñar."
+            },
+            {
+                question: "La planificación educativa se considera un instrumento para:",
+                options: ["La reproducción de un sistema educativo estático.", "La transformación de la enseñanza y, a su vez, de la sociedad.", "El control absoluto sobre la espontaneidad del alumno.", "Cumplir un requisito meramente burocrático."],
+                answer: "La transformación de la enseñanza y, a su vez, de la sociedad.",
+                page: 33,
+                feedback: "A través de la planificación, los actores educativos construyen un medio entre la realidad y su práctica, permitiéndoles objetivarla y, de esta forma, poder transformarla, con una visión de cambio social."
+            },
+            {
+                question: "¿Cuál es una de las principales objeciones de Carlos Vaz Ferreira al régimen de exámenes?",
+                options: ["Asegura un mínimo de instrucción.", "Desnaturaliza la enseñanza y sustituye la cultura por una erudición superficial.", "Forma el carácter y la personalidad del alumno.", "Permite una visión global de la asignatura."],
+                answer: "Desnaturaliza la enseñanza y sustituye la cultura por una erudición superficial.",
+                page: 114,
+                feedback: "Vaz Ferreira argumentaba que el régimen de exámenes anuales desnaturaliza la enseñanza, reemplazando la verdadera cultura con una erudición superficial y destruyendo el placer del estudio."
+            }
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        const quizArea = document.getElementById('quiz-area');
+        const resultsArea = document.getElementById('results-area');
+        const scoreElement = document.getElementById('score');
+        const finalFeedbackElement = document.getElementById('final-feedback');
+        
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        function startQuiz() {
+            currentQuestions = [...quizData];
+            shuffleArray(currentQuestions);
+            currentQuestionIndex = 0;
+            score = 0;
+            resultsArea.classList.add('hidden');
+            quizArea.classList.remove('hidden');
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex < currentQuestions.length) {
+                const questionData = currentQuestions[currentQuestionIndex];
+                let optionsHtml = '';
+                shuffleArray(questionData.options);
+                questionData.options.forEach(option => {
+                    optionsHtml += `<button class="block w-full text-left p-4 my-2 bg-gray-200 rounded-lg hover:bg-blue-200 transition-colors" onclick="selectAnswer(this, '${option === questionData.answer}', '${questionData.feedback}', ${questionData.page})">${option}</button>`;
+                });
+
+                quizArea.innerHTML = `
+                    <div class="mb-6">
+                        <p class="text-lg font-semibold mb-1">Pregunta ${currentQuestionIndex + 1} de ${currentQuestions.length}</p>
+                        <h2 class="text-xl sm:text-2xl">${questionData.question}</h2>
+                    </div>
+                    <div id="options-container">
+                        ${optionsHtml}
+                    </div>
+                    <div id="feedback-container" class="mt-4 text-sm p-4 rounded-lg"></div>
+                    <div class="mt-6 text-right">
+                        <button id="next-btn" class="hidden bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors" onclick="nextQuestion()">Siguiente Pregunta</button>
+                    </div>
+                `;
+            } else {
+                showResults();
+            }
+        }
+
+        function selectAnswer(button, isCorrectStr, feedback, page) {
+            const isCorrect = isCorrectStr === 'true';
+            const options = document.getElementById('options-container').querySelectorAll('button');
+            const feedbackContainer = document.getElementById('feedback-container');
+
+            options.forEach(opt => {
+                opt.disabled = true; // Deshabilitar todas las opciones
+                const questionData = currentQuestions[currentQuestionIndex];
+                if (opt.innerText === questionData.answer) {
+                    opt.classList.remove('bg-gray-200', 'hover:bg-blue-200');
+                    opt.classList.add('bg-green-300'); // Marcar la correcta en verde
+                }
+            });
+
+            if (isCorrect) {
+                score += 4;
+                button.classList.remove('bg-gray-200', 'hover:bg-blue-200');
+                button.classList.add('bg-green-500', 'text-white');
+                feedbackContainer.innerHTML = `<p class="font-bold feedback-correct">¡Correcto!</p><p>${feedback}</p><p class="mt-2 text-gray-500">Consulta la página ${page} del PDF.</p>`;
+                feedbackContainer.classList.add('bg-green-100');
+            } else {
+                button.classList.remove('bg-gray-200', 'hover:bg-blue-200');
+                button.classList.add('bg-red-500', 'text-white');
+                feedbackContainer.innerHTML = `<p class="font-bold feedback-incorrect">Incorrecto.</p><p>${feedback}</p><p class="mt-2 text-gray-500">Consulta la página ${page} del PDF.</p>`;
+                feedbackContainer.classList.add('bg-red-100');
+            }
+
+            document.getElementById('next-btn').classList.remove('hidden');
+        }
+        
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function showResults() {
+            quizArea.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            scoreElement.innerText = score;
+
+            let feedbackMessage = '';
+            if (score >= 80) {
+                feedbackMessage = "¡Excelente trabajo! Demuestras un profundo conocimiento de la Didáctica de la Física.";
+            } else if (score >= 60) {
+                feedbackMessage = "¡Buen trabajo! Tienes una buena comprensión de los temas, pero hay áreas que puedes reforzar.";
+            } else if (score >= 40) {
+                feedbackMessage = "Sigue estudiando. Has captado algunas ideas clave, pero una revisión del material te será de gran ayuda.";
+            } else {
+                feedbackMessage = "Te recomendamos volver a estudiar el documento. ¡No te desanimes, el esfuerzo dará sus frutos!";
+            }
+            finalFeedbackElement.innerText = feedbackMessage;
+        }
+
+        function restartQuiz() {
+            startQuiz();
+        }
+
+        // Iniciar el cuestionario al cargar la página
+        window.onload = startQuiz;
+    </script>
+
+</body>
+</html>

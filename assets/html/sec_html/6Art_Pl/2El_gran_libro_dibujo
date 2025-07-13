@@ -1,0 +1,475 @@
+import React, { useState, useEffect } from 'react';
+
+// Define the questions for the quiz
+const quizQuestions = [
+  {
+    question: "Según el libro, ¿cuáles son los únicos elementos necesarios para dibujar el mejor de los dibujos?",
+    options: [
+      { text: "Lápices de colores y acuarelas.", isCorrect: false },
+      { text: "Lápiz y papel.", isCorrect: true },
+      { text: "Carboncillo y sanguina.", isCorrect: false },
+      { text: "Pluma y tinta china.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! El libro afirma que para realizar el mejor de los dibujos solo es necesario lápiz y papel.",
+    feedbackIncorrect: "Incorrecto. Aunque se pueden usar otros materiales, la idea básica es que solo se necesita lápiz y papel para el mejor dibujo.",
+    page: 3,
+  },
+  {
+    question: "¿Cuál es la posición más común para que un artista trabaje cuando dibuja en el campo o en la ciudad?",
+    options: [
+      { text: "De pie.", isCorrect: false },
+      { text: "Sentado.", isCorrect: true },
+      { text: "Recostado.", isCorrect: false },
+      { text: "Apoyado en un caballete de taller.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Cuando se dibuja en el campo o en la ciudad, lo normal es que el artista trabaje sentado.",
+    feedbackIncorrect: "Incorrecto. Aunque es posible dibujar de pie para apuntes rápidos, la posición común en exteriores es sentado.",
+    page: 3,
+  },
+  {
+    question: "Para transportar materiales de dibujo fuera del estudio, ¿qué tipo de objeto se considera ideal?",
+    options: [
+      { text: "Un rollo de papel absorbente.", isCorrect: false },
+      { text: "Un caballete de taller.", isCorrect: false },
+      { text: "Una caja-estuche de tamaño reducido.", isCorrect: true },
+      { text: "Un sillón de trabajo.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Excelente! Una caja-estuche como las de pinturas al óleo, de tamaño reducido, es ideal para transportar materiales de dibujo.",
+    feedbackIncorrect: "No es la respuesta correcta. Una caja-estuche es lo recomendado para transportar materiales fuera del estudio.",
+    page: 4,
+  },
+  {
+    question: "En un estudio de dibujo, ¿de qué lado debería venir la luz exterior respecto a la mesa?",
+    options: [
+      { text: "Desde el lado derecho.", isCorrect: false },
+      { text: "Desde el lado izquierdo.", isCorrect: true },
+      { text: "Desde arriba (cenital).", isCorrect: false },
+      { text: "Desde el frente.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Así es! Se recomienda que la luz exterior venga del lado izquierdo respecto a la mesa.",
+    feedbackIncorrect: "No. Para una iluminación óptima en el estudio, la luz exterior debe provenir del lado izquierdo.",
+    page: 6,
+  },
+  {
+    question: "¿Para qué tipo de dibujos NO se recomienda el spray fijador en aerosol?",
+    options: [
+      { text: "Lápiz plomo.", isCorrect: false },
+      { text: "Carbón.", isCorrect: false },
+      { text: "Carboncillo.", isCorrect: false },
+      { text: "Pastel.", isCorrect: true },
+    ],
+    feedbackCorrect: "¡Correcto! No es recomendable usar el fijador en aerosol para dibujos al pastel, ya que altera los colores.",
+    feedbackIncorrect: "Incorrecto. El spray fijador es útil para varios medios, pero no para el pastel debido a la alteración del color.",
+    page: 7,
+  },
+  {
+    question: "¿Por qué la regla graduada debe ser metálica al cortar papel o cartón?",
+    options: [
+      { text: "Para que sea más pesada.", isCorrect: false },
+      { text: "Para evitar que se deteriore con una cuchilla o cutter.", isCorrect: true },
+      { text: "Para que sea más flexible.", isCorrect: false },
+      { text: "Para que refleje mejor la luz.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Exacto! Una regla metálica evita el deterioro al cortar con cuchillas o cutters.",
+    feedbackIncorrect: "No es la razón principal. La resistencia al corte es la clave para una regla metálica.",
+    page: 7,
+  },
+  {
+    question: "¿Cómo se distinguen los papeles de dibujo de alta calidad?",
+    options: [
+      { text: "Por su grosor y color.", isCorrect: false },
+      { text: "Por la presencia del nombre o marca del fabricante grabado en seco o con marca al agua.", isCorrect: true },
+      { text: "Por ser siempre blancos y lisos.", isCorrect: false },
+      { text: "Por su bajo precio.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! La marca del fabricante o la marca al agua son indicadores de calidad.",
+    feedbackIncorrect: "Incorrecto. La calidad se identifica por la marca grabada o la marca al agua, no solo por su apariencia o costo.",
+    page: 8,
+  },
+  {
+    question: "¿Qué tipo de papel es especialmente indicado para dibujar a la pluma y con lápiz plomo para grandes contrastes y difuminados perfectos, muy apropiados para retratos?",
+    options: [
+      { text: "Papel de grano grueso.", isCorrect: false },
+      { text: "Papel verjurado Ingres.", isCorrect: false },
+      { text: "Papeles satinados.", isCorrect: true },
+      { text: "Papel Canson de colores.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Muy bien! Los papeles satinados son ideales para la pluma y el lápiz plomo, realzando contrastes y difuminados.",
+    feedbackIncorrect: "No. Los papeles satinados son los recomendados para esos efectos específicos.",
+    page: 8,
+  },
+  {
+    question: "El papel verjurado Ingres, blanco y de colores, ¿para qué se usa principalmente?",
+    options: [
+      { text: "Acuarela.", isCorrect: false },
+      { text: "Lápices de colores.", isCorrect: false },
+      { text: "Carboncillo y carbón.", isCorrect: true },
+      { text: "Tinta china.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! El papel verjurado Ingres se usa principalmente para dibujar con carboncillo y carbón.",
+    feedbackIncorrect: "Incorrecto. Aunque puede usarse con otros medios, su uso principal es con carboncillo y carbón.",
+    page: 8,
+  },
+  {
+    question: "¿Cuál es el tamaño estándar de una 'Media entera' de papel para dibujo?",
+    options: [
+      { text: "35 x 50 cm.", isCorrect: false },
+      { text: "50 x 70 cm.", isCorrect: true },
+      { text: "70 x 100 cm.", isCorrect: false },
+      { text: "25 x 35 cm.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Excelente! La 'Media entera' tiene un tamaño estándar de 50 x 70 cm.",
+    feedbackIncorrect: "Incorrecto. El tamaño estándar de una 'Media entera' es 50 x 70 cm.",
+    page: 11,
+  },
+  {
+    question: "En los lápices de plomo, ¿qué indican las letras B y H?",
+    options: [
+      { text: "B para Borrador, H para Húmedo.", isCorrect: false },
+      { text: "B para Blando (Black), H para Duro (Hard).", isCorrect: true },
+      { text: "B para Brillante, H para Opaco.", isCorrect: false },
+      { text: "B para Básico, H para Hueco.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! B se refiere a blando (black) y H a duro (hard).",
+    feedbackIncorrect: "No. Las letras B y H se refieren a la dureza de la mina del lápiz: B para blando y H para duro.",
+    page: 13,
+  },
+  {
+    question: "¿Cuál es la principal ventaja de la goma de borrar de caucho blando, como la goma de miga de pan o la goma moldeable?",
+    options: [
+      { text: "Borra sin dejar residuos.", isCorrect: false },
+      { text: "Puede usarse como difumino.", isCorrect: false },
+      { text: "No altera ni deteriora el papel.", isCorrect: true },
+      { text: "Es más económica.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Exacto! Estas gomas tienen la ventaja de no alterar ni deteriorar el papel.",
+    feedbackIncorrect: "Incorrecto. La ventaja principal es que no dañan el papel.",
+    page: 14,
+  },
+  {
+    question: "¿De qué material están hechos los difuminos y para qué se utilizan?",
+    options: [
+      { text: "Goma de borrar, para eliminar trazos.", isCorrect: false },
+      { text: "Papel esponjoso, para difuminar trazos y crear grisados.", isCorrect: true },
+      { text: "Carboncillo, para trazar líneas oscuras.", isCorrect: false },
+      { text: "Madera, para afilar lápices.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Los difuminos están hechos de papel esponjoso y se usan para difuminar y crear grisados.",
+    feedbackIncorrect: "No es la función correcta. Los difuminos se usan para suavizar y mezclar trazos.",
+    page: 15,
+  },
+  {
+    question: "¿Cuál es la distancia mínima ideal entre los ojos del artista y el papel de dibujo para un retrato o figura?",
+    options: [
+      { text: "Menos de 10 cm.", isCorrect: false },
+      { text: "Entre 12 y 93 cm.", isCorrect: true },
+      { text: "Más de 100 cm.", isCorrect: false },
+      { text: "La distancia no importa.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! La distancia óptima para dibujar un retrato o figura es entre 12 y 93 cm.",
+    feedbackIncorrect: "Incorrecto. Una distancia adecuada es crucial para la correcta visualización del dibujo.",
+    page: 17,
+  },
+  {
+    question: "¿Qué material se considera un medio idóneo para dibujar el cartón (boceto de una pintura mural)?",
+    options: [
+      { text: "Lápiz de colores.", isCorrect: false },
+      { text: "Acuarela.", isCorrect: false },
+      { text: "Carboncillo.", isCorrect: true },
+      { text: "Sanguina.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Así es! El carboncillo es el medio idóneo para dibujar cartones y para proyectos y cartones (bocetos a escala).",
+    feedbackIncorrect: "No es el material principal. El carboncillo es especialmente recomendado para bocetos a gran escala.",
+    page: 23,
+  },
+  {
+    question: "¿Cuál es una de las principales diferencias entre las cretas y las sanguinas?",
+    options: [
+      { text: "Las cretas son solo blancas, mientras que las sanguinas son solo rojas.", isCorrect: false },
+      { text: "Las cretas suelen ser de colores, mientras que las sanguinas son rojizas.", isCorrect: true },
+      { text: "Las cretas no se fijan, las sanguinas sí.", isCorrect: false },
+      { text: "Las cretas son más duras que las sanguinas.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Las cretas se presentan en colores, mientras que la sanguina tiene tonos rojizos.",
+    feedbackIncorrect: "Incorrecto. La principal diferencia radica en su gama de colores y pigmentación.",
+    page: 29,
+  },
+  {
+    question: "¿Es posible componer todos los colores de la Naturaleza con solo tres colores más el blanco y el negro usando lápices de colores?",
+    options: [
+      { text: "No, se necesitan al menos 12 colores.", isCorrect: false },
+      { text: "Sí, es posible con los colores primarios.", isCorrect: false },
+      { text: "Sí, con solo tres colores (rojo, amarillo, azul) y blanco y negro.", isCorrect: true },
+      { text: "Solo si son lápices de calidad profesional.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Con solo tres colores (rojo, amarillo, azul) y el blanco y el negro del papel, es posible componer todos los colores de la Naturaleza.",
+    feedbackIncorrect: "No es la respuesta correcta. El libro indica que con los tres colores primarios más blanco y negro es suficiente.",
+    page: 33,
+  },
+  {
+    question: "Según la lección de Van Gogh, ¿cuáles son los tres colores primarios?",
+    options: [
+      { text: "Rojo, verde, azul.", isCorrect: false },
+      { text: "Amarillo, azul, rojo.", isCorrect: true },
+      { text: "Cian, magenta, amarillo.", isCorrect: false },
+      { text: "Naranja, violeta, verde.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Según Van Gogh, los tres colores primarios son Amarillo, Azul y Rojo.",
+    feedbackIncorrect: "Incorrecto. Los colores primarios que se mencionan son Amarillo, Azul y Rojo.",
+    page: 35,
+  },
+  {
+    question: "¿Qué tipo de agua se recomienda usar si la aguada se realiza con tinta china?",
+    options: [
+      { text: "Agua de grifo.", isCorrect: false },
+      { text: "Agua destilada.", isCorrect: true },
+      { text: "Agua mineral.", isCorrect: false },
+      { text: "Agua con jabón.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! Para la aguada con tinta china, el agua debe ser destilada.",
+    feedbackIncorrect: "No. La tinta china requiere agua destilada para una mejor aguada.",
+    page: 43,
+  },
+  {
+    question: "¿Cuál es la principal diferencia entre los colores a la cera y los pasteles al óleo, según el libro?",
+    options: [
+      { text: "Los colores a la cera se pueden borrar fácilmente, los pasteles al óleo no.", isCorrect: false },
+      { text: "Los colores a la cera se componen de pigmentos y cera, los pasteles al óleo de pigmentos y aceite.", isCorrect: true },
+      { text: "Los colores a la cera son solo para principiantes, los pasteles al óleo para profesionales.", isCorrect: false },
+      { text: "Los colores a la cera son más brillantes que los pasteles al óleo.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! La diferencia principal radica en su aglutinante: cera para los colores a la cera y aceite para los pasteles al óleo.",
+    feedbackIncorrect: "Incorrecto. La composición del aglutinante es la clave.",
+    page: 49,
+  },
+  {
+    question: "¿Es posible fijar un dibujo al pastel para que no se deteriore ni se altere?",
+    options: [
+      { text: "Sí, usando un spray fijador específico.", isCorrect: false },
+      { text: "No, el pastel no se puede fijar y siempre se deteriora.", isCorrect: true },
+      { text: "Solo si se usa laca para el cabello.", isCorrect: false },
+      { text: "Sí, con goma de borrar de miga de pan.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! El pastel no se puede fijar y, por tanto, siempre se deteriora un poco, por lo que el libro recomienda guardarlos bien.",
+    feedbackIncorrect: "Incorrecto. El libro menciona que el pastel no se puede fijar sin que se altere, lo que hace que se deteriore con el tiempo.",
+    page: 51,
+  },
+  {
+    question: "Al dibujar un objeto, ¿dónde se sitúa la línea de horizonte?",
+    options: [
+      { text: "Siempre en el centro del papel.", isCorrect: false },
+      { text: "A la altura de los ojos del artista.", isCorrect: true },
+      { text: "A la altura del objeto más alto.", isCorrect: false },
+      { text: "En cualquier lugar que el artista desee.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Exacto! La línea de horizonte siempre se sitúa a la altura de los ojos del artista.",
+    feedbackIncorrect: "No. La línea de horizonte está directamente relacionada con el punto de vista del artista.",
+    page: 58,
+  },
+  {
+    question: "¿Cuál es la diferencia entre 'luz general' y 'luz puntual' en la iluminación de un dibujo?",
+    options: [
+      { text: "La luz general es natural y la puntual es artificial.", isCorrect: false },
+      { text: "La luz general disminuye la intensidad de las sombras difuminadas, mientras que la puntual crea sombras definidas y límites claros.", isCorrect: true },
+      { text: "La luz general se usa para retratos, la puntual para paisajes.", isCorrect: false },
+      { text: "No hay diferencia, son términos intercambiables.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! La luz general suaviza las sombras, mientras que la luz puntual las define claramente.",
+    feedbackIncorrect: "Incorrecto. La diferencia principal está en cómo afectan a la definición y suavidad de las sombras.",
+    page: 63,
+  },
+  {
+    question: "¿Qué se expresa con la 'Ley de contrastes simultáneos' en el dibujo artístico?",
+    options: [
+      { text: "Cómo los colores se mezclan entre sí.", isCorrect: false },
+      { text: "Cómo un blanco resulta más blanco cuanto más oscuro es el tono que le rodea.", isCorrect: true },
+      { text: "La relación entre la luz y la sombra en una composición.", isCorrect: false },
+      { text: "La técnica para crear texturas.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Así es! Esta ley describe cómo la percepción del brillo de un color se intensifica por el contraste con los tonos circundantes.",
+    feedbackIncorrect: "No es la definición de esta ley. Se refiere a cómo los tonos se afectan mutuamente por su proximidad.",
+    page: 68,
+  },
+  {
+    question: "¿Qué es el 'escorzo' en el dibujo artístico?",
+    options: [
+      { text: "La técnica de dibujar objetos muy pequeños.", isCorrect: false },
+      { text: "La alteración de la perspectiva para representar un objeto o figura que se aleja o acerca al espectador.", isCorrect: true },
+      { text: "El uso de colores muy intensos.", isCorrect: false },
+      { text: "La capacidad de dibujar sin errores.", isCorrect: false },
+    ],
+    feedbackCorrect: "¡Correcto! El escorzo es la palabra que usamos los artistas cuando hablamos de un cuerpo en posición oblicua o un objeto en perspectiva, que parece achicarse o alargarse para dar la sensación de profundidad.",
+    feedbackIncorrect: "Incorrecto. El escorzo es una técnica de perspectiva que da la ilusión de profundidad.",
+    page: 98,
+  },
+];
+
+// Helper function to shuffle an array
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
+
+const App = () => {
+  const [questions, setQuestions] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showResult, setShowResult] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+
+  useEffect(() => {
+    // Shuffle questions when the component mounts
+    setQuestions(shuffleArray([...quizQuestions]));
+  }, []);
+
+  // Handle an option click
+  const handleAnswerClick = (option) => {
+    if (isAnswered) return; // Prevent multiple clicks on the same question
+
+    setSelectedOption(option);
+    setIsAnswered(true);
+
+    if (option.isCorrect) {
+      setScore(score + 4);
+      setFeedbackMessage(questions[currentQuestionIndex].feedbackCorrect);
+    } else {
+      setFeedbackMessage(questions[currentQuestionIndex].feedbackIncorrect);
+    }
+  };
+
+  // Move to the next question or show results
+  const nextQuestion = () => {
+    setFeedbackMessage('');
+    setSelectedOption(null);
+    setIsAnswered(false);
+
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      setShowResult(true);
+    }
+  };
+
+  // Restart the quiz
+  const restartQuiz = () => {
+    setQuestions(shuffleArray([...quizQuestions])); // Reshuffle for a new game
+    setCurrentQuestionIndex(0);
+    setScore(0);
+    setShowResult(false);
+    setFeedbackMessage('');
+    setSelectedOption(null);
+    setIsAnswered(false);
+  };
+
+  // General feedback based on score
+  const getGeneralFeedback = () => {
+    const percentage = (score / (questions.length * 4)) * 100;
+    if (percentage === 100) {
+      return "¡Felicidades! Has demostrado un conocimiento excepcional sobre el dibujo artístico. ¡Eres un verdadero experto!";
+    } else if (percentage >= 80) {
+      return "¡Excelente trabajo! Tienes un gran dominio de los conceptos clave. Sigue practicando para alcanzar la perfección.";
+    } else if (percentage >= 60) {
+      return "Buen esfuerzo. Tienes una base sólida, pero hay áreas en las que puedes mejorar. ¡Sigue aprendiendo!";
+    } else {
+      return "Necesitas repasar algunos conceptos básicos. ¡No te rindas, cada error es una oportunidad para aprender!";
+    }
+  };
+
+  if (questions.length === 0) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+        <p className="text-lg text-gray-700">Cargando cuestionario...</p>
+      </div>
+    );
+  }
+
+  const currentQuestion = questions[currentQuestionIndex];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full border-4 border-purple-300">
+        <h1 className="text-4xl font-extrabold text-center text-purple-800 mb-6 font-inter">
+          Cuestionario: El Gran Libro del Dibujo
+        </h1>
+
+        {showResult ? (
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-purple-700 mb-4 font-inter">Resultados Finales</h2>
+            <p className="text-2xl text-gray-800 mb-6 font-inter">
+              Tu puntuación total es: <span className="font-bold text-blue-600">{score}</span> de{" "}
+              <span className="font-bold text-blue-600">{questions.length * 4}</span>
+            </p>
+            <p className="text-xl text-gray-700 mb-8 font-inter">{getGeneralFeedback()}</p>
+            <button
+              onClick={restartQuiz}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-transform transform hover:scale-105 duration-300 font-inter"
+            >
+              Reiniciar Cuestionario
+            </button>
+          </div>
+        ) : (
+          <div>
+            <p className="text-lg text-gray-600 mb-4 font-inter">
+              Pregunta {currentQuestionIndex + 1} de {questions.length}
+            </p>
+            <h2 className="text-2xl font-semibold text-gray-900 mb-6 font-inter">
+              {currentQuestion.question}
+            </h2>
+            <div className="space-y-4">
+              {currentQuestion.options.map((option, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleAnswerClick(option)}
+                  disabled={isAnswered}
+                  className={`
+                    w-full text-left p-4 rounded-xl border-2
+                    ${isAnswered
+                      ? option.isCorrect
+                        ? 'bg-green-100 border-green-500 text-green-800 font-bold'
+                        : selectedOption === option
+                          ? 'bg-red-100 border-red-500 text-red-800 font-bold'
+                          : 'bg-gray-50 border-gray-200 text-gray-700 cursor-not-allowed'
+                      : 'bg-blue-50 border-blue-200 text-blue-800 hover:bg-blue-100 hover:border-blue-300 cursor-pointer'
+                    }
+                    transition-all duration-200 ease-in-out transform hover:scale-[1.02]
+                    shadow-sm font-inter
+                  `}
+                >
+                  {option.text}
+                </button>
+              ))}
+            </div>
+
+            {feedbackMessage && (
+              <div className={`mt-6 p-4 rounded-xl border-2 ${selectedOption?.isCorrect ? 'bg-green-50 border-green-400 text-green-700' : 'bg-red-50 border-red-400 text-red-700'} shadow-md font-inter`}>
+                <p className="font-semibold">{feedbackMessage}</p>
+                <p className="mt-2 text-sm">Respuesta en la página {currentQuestion.page} del PDF.</p>
+              </div>
+            )}
+
+            <div className="mt-8 flex justify-end">
+              <button
+                onClick={nextQuestion}
+                disabled={!isAnswered}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-transform transform hover:scale-105 duration-300 font-inter disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {currentQuestionIndex < questions.length - 1 ? "Siguiente Pregunta" : "Ver Resultados"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="text-center mt-10 text-gray-500 text-sm font-inter">
+          PREPARATE Y APRUEBA TU EXAMEN DE ASCENSO 2025. © por Victor
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
